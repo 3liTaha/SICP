@@ -1,0 +1,209 @@
+/**
+"""Interesting"""
+1.10 Ackermann's funciton.
+1.12 Pascal's.
+1.18 Russian Peasant Multiplication.
+((1E,t10))
+**/
+
+
+1.1
+10 --> 10
+(+ 5 3 4) --> 12
+(- 9 1) --> 8
+(/ 6 2) --> 3
+(+ (* 2 4) (- 4 6)) --> 6
+(define a 3) --> a = 3
+(define b (+ a 1)) --> b = 4
+(+ a b (* a b)) --> 19
+(= a b) --> #f
+(if (and (> b a) (< b (*  a b))) b a) --> 4
+(cond ((= a 4) 6)
+      ((= b 4) (+ 6 7 a))
+      (else 25)) --> 16
+(+ 2 (if (> b a) b a)) --> 6
+(* (cond ((> a b) a)
+	 ((< a b) b)
+	 (else -1))
+   (+ a 1)) --> 16
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+1.2
+(/ (+ 5 4 (- 2 (- 3 (+ 6 (/ 4 5)))))
+   (* 3 (- 6 2) (- 2 7)))
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+1.3
+(define (ss a b) (+ (* a a) (* b b)))
+(define (proc a b c)
+        (cond ((and (> a c) (> b c)) (ss a b))
+	      ((and (> a b) (> c b)) (ss a c))
+              (else (ss b c))))
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+1.4
+The procedure returns a+|b|
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+1.5 (Fully Expand Then Reduce VS. Evaluate the arguments and Then apply)
+If the Interpreter does normal order evaluation, it will return 0. Otherwise if it 
+does applicative order evaluation the procedure will loop infinitely.
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+1.6
+The Interperter goes into an infinite loop of evluating sqrt-iter since we follow applicative
+order evaluation.
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+1.7
+The good-enough? test used so far relies on the fact that the magnitude of the difference is
+very small compared to the target value. This fails when we'are dealing with
+very small numbers. 
+(define (good-enough? guess x)
+(< (abs (- (square guess) x)) 0.001))
+
+In the above procedure defined in the text the threhold is 0.001, so if we were trying 
+to find roots of numbers smaller than 0.0001 we wouldn't succeed with the above code.
+For large numbers the failiure will occur when we try to square the large number and run out
+of memory and so good-enough? will give some nonsensical result.
+
+Below is a newly defined procedure relying on the relative change in magnitude of the guess:
+
+(define (good-enough? guess og)
+(< (abs (- 1 (/ guess og))) (* guess 0.000001)))
+
+(define (sqrt-iter guess  og x)
+(if (good-enough? guess og)
+guess
+(sqrt-iter (improve guess x) guess x)))
+
+(define (improve guess x)
+(average guess (/ x guess)))
+
+(define (average x y)
+(/ (+ x y) 2))
+(define (sqrt x)
+(sqrt-iter 1.0 10 x))
+
+The approach described above works betteer for smaller numbers.
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+1.8
+(define (good-enough? guess og)
+(< (abs (- 1 (/ guess og))) (* guess 0.000001)))
+
+(define (cube-iter guess  og x)
+(if (good-enough? guess og)
+guess
+(cube-iter (improve guess x) guess x)))
+
+(define (improve y x)
+ (/ 
+(+ (/ x (* y y)) (* 2.0 y)) 
+
+3	)	)
+
+(define (cbrt x)(cube-iter 1 20 x))
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+1.9
+(+ 4 5)
+(if (= 4 0) 5 (inc (+ 3 5)))))
+(inc ((if (= 3 0) 5 (inc (+ 2 5))))))))))
+(inc (inc ((if (= 2 0) 5 (inc (+ 1 5))))))))
+(inc (inc (inc ((if (= 1 0) 5 (inc (+ 0 5)))))))))
+(inc (inc (inc (inc ((if (= 0 0) 5 (inc (+ 0 5))))))))))
+(inc (inc (inc 6)))
+(inc (inc 7))
+(inc 8)
+(0)
+This Process is Recursive.
+
+(+ 4 5)
+(+ 3 6)
+(+ 2 7)
+(+ 1 8)
+(+ 0 9)
+(9)
+This Process is Iterative.
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+1.10
+(f n) --> 2n
+(g n) --> 2^n
+(h n) --> 2^2^2^2...^2 n timems for n > 1
+(k n) --> 5n^2
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+1.11
+Recursive Process:
+(define (f n) 
+	(if (< n 3) n (+ (f (- n 1)) (* 2 (f (- n 2))) (* 3 (f (- n 3))))))
+
+Iterative Process:
+(define (f n) (if (< n 3) n (iter 0 1 2 (- n 2))))
+(define (iter a b c n) 
+	(if (= n 0) c (iter b c (+ c (* 2 b) (* 3 a)) (- n 1))))
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+1.12
+(define (pascal n k) 
+(cond
+	((= k 1) 1)
+	((= k n) 1)
+	((= n 1) 1)
+	(else (+ (pascal (- n 1) (- k 1)) (pascal (- n 1) k)))))
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+1.14
+Time Complexity  O(n^5)
+Space Complexity O(n)
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+1.15
+a. The Procedure p is applied 5 times.
+b. Number of steps grows as log(a).
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+1.16
+(define 
+	(fast-expt b n)
+	(expt b 1 n)
+)
+(define 
+	(expt b a n)
+	(cond
+		((= n 0) a)
+		((= n 1) (* a b))
+		(else 
+			(expt (square b) 
+			      (* a (max 1 (* b (remainder n 2)))) 
+			      (quotient n 2) ) 
+		)
+	)
+)
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+1.17
+(define (fast-mult a b)
+(cond ((= b 0) 0)
+((even? b) (* 2 (fast-mult a (/ b 2))))
+(else (+ a (fast-mult a (- b 1))))))
+
+(define (even? n)
+(= (remainder n 2) 0))
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+1.18
+(Russian Peasant method of Multiplication/ Egyptian Scribe A'h-mose)
+(define 
+	(fast-mult a b)
+	(mult a b 0)
+)
+(define 
+	(mult a b c)
+	(cond
+		((= b 0) 0)
+		((= b 1) (+ a c))
+		((even? b) (mult (* 2 a) (/ b 2) c))
+		(else      (mult (* 2 a) (/ (- b 1) 2) (+ a c)))
+	)
+)
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+1.20
+(gcd 206 40)//Calls remainder
+(gcd 40 6)//Calls remainder
+(gcd  6 4)//calls remainder
+(gcd  4 2)//calls remainder
+(gcd  2 0)//calls remainder
+2
+18 remainder operations are performed in nomral order evaluation.
+4 remainder operations are performed in applicative-order evaluation.
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+
+
