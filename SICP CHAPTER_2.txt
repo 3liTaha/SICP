@@ -1,5 +1,6 @@
 /**
-2.6 Church Numerals
+2.6   Church Numerals
+2.34  Horner's rule: provably Fastest way of evaluating Polynomials.
 **/
 2.1
 (define (make-rat n d)
@@ -202,5 +203,200 @@ nil
    (if (list? x) 
        (reverse (map deep-reverse x)) 
        x)) 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+2.28
+(define (fringe tree)
+	(cond
+		((null? tree) tree)
+		((list? tree) (append (fringe (car tree))  (fringe (cdr tree))))
+		(else (list tree))
+	)
+)
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+2.30
+(define (square-tree tree)
+	(cond
+		((null? tree) tree)
+		((list? tree) (map square-tree tree))
+		(else (square tree))
+	)
+)
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+2.31
+(define (tree-map proc tree)
+	(cond
+		((null? tree) tree)
+		((list? tree) (map (lambda (x) (tree-map proc x)) tree))
+		(else (proc tree))
+	)
+)
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+2.32
+(define (subsets s)
+	(if 
+		(null? s)
+		(list (list))
+		(let ((rest (subsets (cdr s))))
+			(append
+				rest
+				(map (lambda (x) (cons (car s) x))   rest))
+		)
+	)
+)
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+2.33
+(define (map p sequence)
+	(accumulate   (lambda (x y) (cons (p x) y) ) (list) sequence)
+)
+
+(define (append seq1 seq2)
+	(accumulate cons seq2 seq1)
+)
+(define (lengthm sequence)
+	(accumulate (lambda (x y) (+ 1 y)) 0 sequence)
+)
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+2.34
+(define (horner-eval x coefficient-sequence)
+	(accumulate 
+		(lambda (c1 cn) (+ c1 (* cn x)))
+		0
+		coefficient-sequence
+	)
+)
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+2.35
+(define (count-leaves t) 
+	(accumulate 
+		(lambda (x y)
+			(if 
+				(list? x) 
+				(+ (count-leaves x) y)
+				(+ 1 y)
+			)
+		) 
+		0 
+		t
+	)
+)
+
+
+(define (count-leaves t)
+	(accumulate + 0 (map (lambda(x) 1) (fringe t)))
+)
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+2.36
+(define (accumulate-n op init seqs)
+	(if 
+		(null? (car seqs))
+		()
+		(cons 
+			(accumulate op init (map car seqs))
+			(accumulate-n op init (map cdr seqs))
+		)
+	)
+)
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+2.40
+(define (enumerate-interval low high)
+	(if
+		(> low high)
+		()
+		(cons low (enumerate-interval (+ low 1) high))
+	)
+)
+(define (flatmap proc seq)
+	(accumulate append () (map proc seq)))
+(define (unique-pairs n)
+	(flatmap
+		(lambda (i) 
+			(map 
+				(lambda (j) (list i j))
+				(enumerate-interval 1 (- i 1))
+			)
+		)
+		
+		(enumerate-interval 1 n)
+	)
+)
+(define (make-pair-sum pair)
+	(list (car pair) (cadr pair) (+ (car pair) (cadr pair)))
+)
+(define (prime-sum? pair)
+	(prime? (+ (car pair) (cadr pair)))
+)
+
+(define (prime-sum-pairs n)
+	(map 
+		make-pair-sum
+		(filter
+			prime-sum? 
+			(unique-pairs n)
+		)
+	)
+)
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+2.41
+(define (enumerate low high)
+	(if(> low high)()(cons low (enumerate-interval (+ low 1) high))))
+(define (unique-pairs n)
+	(flatmap(lambda (i) (map (lambda (j) (list i j))(enumerate-interval 1 (- i 1))))
+		(enumerate-interval 1 n)))
+(define (unique-triples n)
+	(flatmap (lambda (x) (map (lambda (b) (cons x b)) (unique-pairs (- x 1)))) 
+		(enumerate 1 n)));enumerator
+(define (sum ls) (accumulate + 0 ls))
+(define (find-triples n s)
+	(filter (lambda (x) (= s (sum x))) (unique-triples n))
+)
+(define (another-triples n)
+	(flatmap 
+		(lambda (a)
+			(flatmap 
+				(lambda (b)
+					(map 
+						(lambda (c) (list a b c))
+                       				(enumerate-interval 1 (- b 1))
+					)
+				)
+                        	(enumerate-interval 1 (- a 1))
+			)
+		)
+           (enumerate-interval 1 n)
+	)
+)
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+2.53
+(list 'a 'b 'c)                             --> (a b c)
+(list (list 'george))			    --> ((george))
+(cdr '((x1 x2) (y1 y2)))		    -->	((y1 y2))
+(cadr '((x1 x2) (y1 y2)))		    --> (y1 y2)
+(pair? (car '(a short list)))		    --> #f
+(memq 'red '( x (red shoes) (blue socks))   --> #f
+(memq 'red '(red shoes blue socks))	    --> (red shoes blue socks)
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+2.54
+(define (equal? a b)
+	(accumulate and #t (map eq? a b)))
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+2.55
+The Interperter Follows the substitution model
+so: 
+   (car ''abc)
+       |
+       V
+(car '(quote abc))
+       |
+       V
+    (quote)
+
+
+
+
+
+
+
+
+
 
 
